@@ -3,7 +3,10 @@
 # Write a dockerfile for creating  docker image
      docker build -t myapp .
 
-# Write yaml file for deploy into kubernetes
+# To create and run a container
+     docker run -d -p 8080:80 --name myconatiner myapp
+
+# Write yaml file and deploy into kubernetes
      kubectl apply -f deployment.yaml 
      kubectl apply -f service.yaml
     
