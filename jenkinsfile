@@ -1,38 +1,48 @@
-Pipeline{
-      agent any
+pipeline {
+    agent any
 
-stages {
-stage(‘checkout code’) {
-          steps { 
-                     git branch : ‘master ‘, url : ‘https://github.com/navaneethan0312/user-app.git’
-       }
-}
-Stage(‘Build’) {
-Steps {
-        sh '''
-                   mvn compile
-                    mvn package -DskipTests’
-                ''' 
-   }
-}
-stage('Build Docker Image') {
+    environment {
+        IMAGE_NAME = "navaneethan0312/user-app"
+        IMAGE_TAG = "v1"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
+            }
+        }
+
+        stage('Build Maven Project') {
+            steps {
+                sh '''
+                    mvn compile
+                    mvn package -DskipTests
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-   }
-}
-  stage('Login to Docker Hub') {
+            }
+        }
+
+        stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
-stage('Push Docker Image') {
+
+        stage('Push Docker Image') {
             steps {
                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
     }
+
     post {
         always {
             sh 'docker ps -a'
