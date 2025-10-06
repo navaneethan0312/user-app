@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "navaneethan0312/user-app"
+        IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v1"
     }
 tools {
