@@ -4,6 +4,9 @@ pipeline {
     environment {
         IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v1"
+        KUBECONFIG = '/var/jenkins_home/kubeconfig'  // Path where Jenkins stores your secret file
+
+
     }
 tools {
     maven 'Maven_3.9.11'
