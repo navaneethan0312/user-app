@@ -5,15 +5,15 @@ pipeline {
         IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v1"
         KUBECONFIG = '/home/jenkins/.kube/config'
-
-
     }
-tools {
-    maven 'Maven_3.9.11'
-    jdk 'JDK-17'
-}
 
-    stages {
+    tools {
+        maven 'Maven_3.9.11'
+        jdk 'JDK-17'
+    }
+
+    stages {   // <-- All stages must be inside THIS block
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
@@ -22,8 +22,8 @@ tools {
 
         stage('Build Maven Project') {
             steps {
-               sh 'mvn compile'
-            sh 'mvn package -DskipTests'
+                sh 'mvn compile'
+                sh 'mvn package -DskipTests'
             }
         }
 
@@ -46,16 +46,22 @@ tools {
                 sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
-    }
-       stage('Deploy to Kubernetes') {
-           steps {
-           script {
+
+        stage('Deploy to Kubernetes') {   // <-- Must be INSIDE stages block
+            steps {
                 sh 'kubectl apply -f k8s/deployment.yaml'
                 sh 'kubectl apply -f k8s/service.yaml'
+            }
         }
-    }
-}
 
+        stage('Verify Deployment') {
+            steps {
+                sh 'kubectl get pods'
+                sh 'kubectl get svc'
+            }
+        }
+
+    }  // <-- End of stages block
 
     post {
         always {
