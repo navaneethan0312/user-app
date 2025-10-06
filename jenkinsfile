@@ -5,6 +5,9 @@ pipeline {
         IMAGE_NAME = "navaneethan0312/user-app"
         IMAGE_TAG = "v1"
     }
+tools {
+    maven 'Maven_3.9.11'
+}
 
     stages {
         stage('Checkout Code') {
@@ -15,10 +18,8 @@ pipeline {
 
         stage('Build Maven Project') {
             steps {
-                sh '''
-                    mvn compile
-                    mvn package -DskipTests
-                '''
+               sh 'mvn compile'
+            sh 'mvn package -DskipTests'
             }
         }
 
