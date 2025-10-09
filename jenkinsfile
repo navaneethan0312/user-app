@@ -2,10 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "navaneethan1204/user-app"
-        IMAGE_TAG = "v2"
-        KUBECONFIG = '/var/lib/jenkins/.kube/config'
-       
+        IMAGE_NAME = "user-app"
+        IMAGE_TAG = "v1"
     }
 
     tools {
@@ -13,63 +11,52 @@ pipeline {
         jdk 'JDK-17'
     }
 
-    stages {   // <-- All stages must be inside THIS block
-
-        stage('Checkout Code') {
+    stages {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
             }
         }
 
-        stage('Build Maven Project') {
+        stage('Build Maven') {
             steps {
                 sh 'mvn compile'
                 sh 'mvn package -DskipTests'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Docker in Minikube') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh '''
+                    eval $(minikube docker-env)
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                '''
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Deploy') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                }
+                sh '''
+                    # Use Minikube kubectl to avoid cert issues
+                    minikube kubectl -- apply -f kubernetes/mysql-deployment.yaml
+                    minikube kubectl -- apply -f kubernetes/mysql-service.yaml
+                    minikube kubectl -- wait --for=condition=ready pod -l app=mysql --timeout=120s
+
+                    minikube kubectl -- apply -f kubernetes/backend-deployment.yaml
+                    minikube kubectl -- apply -f kubernetes/backend-service.yaml
+                    minikube kubectl -- rollout status deployment/backend-deployment
+                '''
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Verify') {
             steps {
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh 'minikube kubectl -- get pods'
+                sh 'minikube kubectl -- get svc'
+                sh 'minikube service backend-service --url'
             }
-        }
-
-        stage('Deploy to Kubernetes') {
-    steps {
-         sh '''
-            eval $(minikube docker-env)
-            export KUBECONFIG=${KUBECONFIG}      
-            kubectl apply -f kubernetes/mysql-deployment.yaml
-            kubectl apply -f kubernetes/mysql-service.yaml
-            kubectl apply -f kubernetes/backend-deployment.yaml
-            kubectl apply -f kubernetes/backend-service.yaml
-          '''
         }
     }
-
-
-        stage('Verify Deployment') {
-            steps {
-                sh 'kubectl get pods'
-                sh 'kubectl get svc'
-            }
-        }
-
-    }  // <-- End of stages block
 
     post {
         always {
