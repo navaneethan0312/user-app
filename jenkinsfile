@@ -51,6 +51,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
     steps {
          sh '''     
+            eval $(minikube docker-env)
+            export KUBECONFIG=/var/lib/jenkins/.kube/config
             kubectl apply -f kubernetes/mysql-deployment.yaml
             kubectl apply -f kubernetes/mysql-service.yaml
             kubectl apply -f kubernetes/backend-deployment.yaml
