@@ -19,7 +19,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
-                credentialsId: 'github_token' 
+                credentialsId: 'github-creds' 
             }
         }
 
