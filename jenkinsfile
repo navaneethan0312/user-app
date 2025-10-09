@@ -4,7 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v2"
-        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+       
     }
 
     tools {
@@ -49,7 +49,6 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
     steps {
-            withEnv(["KUBECONFIG=${KUBECONFIG}"]) {
          sh '''
             eval $(minikube docker-env)
             kubectl apply -f kubernetes/mysql-deployment.yaml
@@ -59,7 +58,7 @@ pipeline {
           '''
         }
     }
-}
+
 
         stage('Verify Deployment') {
             steps {
