@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: anandh15/user-app:latest
+          image: navaneethan1204/user-app:v2
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://mysql-service:3306/testdb
