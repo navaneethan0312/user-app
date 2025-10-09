@@ -4,8 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v2"
-        KUBECONFIG = "/var/lib/jenkins/.kube/config"
-       
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
        
     }
 
@@ -19,7 +18,6 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
-                credentialsId: 'github-creds' 
             }
         }
 
@@ -32,7 +30,6 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'eval $(minikube -p minikube docker-env)'
                 sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
@@ -53,9 +50,9 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
     steps {
-         sh '''     
+         sh '''
             eval $(minikube docker-env)
-            kubectl config use-context minikube
+            export KUBECONFIG=${KUBECONFIG}      
             kubectl apply -f kubernetes/mysql-deployment.yaml
             kubectl apply -f kubernetes/mysql-service.yaml
             kubectl apply -f kubernetes/backend-deployment.yaml
