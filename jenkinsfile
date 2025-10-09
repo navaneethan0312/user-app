@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "navaneethan1204/user-app"
         IMAGE_TAG = "v2"
+        KUBECONFIG = "/var/lib/jenkins/.kube/config"
        
        
     }
@@ -18,6 +19,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/navaneethan0312/user-app.git'
+                credentialsId: 'github_token' 
             }
         }
 
