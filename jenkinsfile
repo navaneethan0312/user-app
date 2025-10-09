@@ -51,6 +51,7 @@ pipeline {
     steps {
             withEnv(["KUBECONFIG=${KUBECONFIG}"]) {
          sh '''
+            eval $(minikube docker-env)
             kubectl apply -f kubernetes/mysql-deployment.yaml
             kubectl apply -f kubernetes/mysql-service.yaml
             kubectl apply -f kubernetes/backend-deployment.yaml
